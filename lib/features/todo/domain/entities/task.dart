@@ -3,9 +3,9 @@ import 'package:equatable/equatable.dart';
 class Task extends Equatable {
   final int id;
   final String title;
-  final bool isCompleted;
+  bool isCompleted;
 
-  const Task({
+  Task({
     required this.id,
     required this.title,
     this.isCompleted = false,

@@ -18,17 +18,24 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
     final response = await client
         .get(Uri.parse('https://jsonplaceholder.typicode.com/todos'));
 
+    print("printing response");
+    print(response);
+
     if (response.statusCode == 200) {
+      print("status code is 200");
       final List<dynamic> data = json.decode(response.body);
-      data
+      print(data);
+      tasks = data
           .map((json) => TaskModel(
-              id: json['id'],
-              title: json['title'],
-              isCompleted: json['completed']))
-          .take(5)
+                id: json['id'],
+                title: json['title'],
+                isCompleted: json['completed'],
+              ))
           .toList();
-      tasks = data as List<TaskModel>;
-      return tasks;
+      //tasks = data as List<TaskModel>;
+      print('printing tasks');
+      print(tasks);
+      return tasks.take(5).toList();
     } else {
       throw Exception('Failed to load tasks');
     }
