@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:get_it/get_it.dart';
+import 'package:todo_app/core/injects/injection_container.dart';
+import 'package:todo_app/core/local_db/bject_gen.dart';
 import 'package:todo_app/features/todo/data/models/task_model.dart';
 import 'package:todo_app/features/todo/domain/entities/task.dart';
 import 'package:todo_app/features/todo/domain/usecases/get_tasks_usecases.dart';
@@ -10,6 +13,7 @@ part 'task_crud_state.dart';
 
 class TaskCrudCubit extends Cubit<TaskCrudState> {
   final GetTasks getTasks;
+  final ObjectBox objectBox = GetIt.instance<ObjectBox>();
 
   TaskCrudCubit({required this.getTasks}) : super(TaskCrudInitial());
   List<Task> task = [];
@@ -34,6 +38,10 @@ class TaskCrudCubit extends Cubit<TaskCrudState> {
       isCompleted: false,
     );
     task.add(createTask);
+    objectBox.taskBox.put(createTask);
+    final tasksfromlocal = objectBox.taskBox.getAll();
+    print('printing task from local');
+    print(tasksfromlocal);
     print(task);
     emit(FetchTaskSucess(task: task));
   }

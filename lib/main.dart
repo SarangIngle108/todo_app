@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_app/core/local_db/bject_gen.dart';
 //import 'package:objectbox/objectbox.dart';
 import 'package:todo_app/features/todo/data/datasources/tasks_remote_datasource.dart';
 import 'package:todo_app/features/todo/data/repositories/task_repository_impl.dart';
@@ -15,7 +16,7 @@ import 'package:todo_app/objectbox.g.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // store = await openStore();
+  // Initialize ObjectBox
   runApp(const MyApp());
 }
 

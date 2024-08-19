@@ -32,8 +32,8 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.0.1
   http: ^0.13.4
-  #objectbox: ^1.7.0
-  #objectbox_flutter_libs: ^1.7.0  
+  objectbox: ^4.0.2
+  objectbox_flutter_libs: any # Required for Flutter 
 
 
   # The following adds the Cupertino Icons font to your application.
