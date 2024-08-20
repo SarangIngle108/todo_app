@@ -4,18 +4,9 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
 
 
+This is the Architecture of the app
 
 lib/
 ├── core/
@@ -46,3 +37,17 @@ lib/
 │   └── widgets/
 │       └── task_item.dart
 └── main.dart
+
+1. ObjectBox has been used to store data locally
+2. Getit has been used for dependency injection
+3. Bloc is used for state management
+4. The app is based on feature first clean architecture
+
+
+# Flow
+Whenever the is opened for the first time 
+the tasks aree fetched from remote 
+thats is through the given api and stored in local db.
+
+else 
+The tasks are fetched from local db.
