@@ -10,14 +10,6 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BlocProvider.of<TaskCrudCubit>(context).fetchTasks();
-    });
-  }
-
   void _showAddTaskDialog() {
     showDialog(
       context: context,
@@ -55,32 +47,79 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    BlocProvider.of<TaskCrudCubit>(context).fetchTasks();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task Todo'),
-      ),
       body: BlocBuilder<TaskCrudCubit, TaskCrudState>(
         builder: (context, state) {
           if (state is FetchTaskSucess) {
+            if (state.task.isEmpty) {
+              return const Center(
+                child: Text('No  tasks found.'),
+              );
+            }
             return SingleChildScrollView(
               child: Column(
                 children: [
                   ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        return Row(
-                          children: [
-                            Text(
-                              state.task[index].title,
-                              style: TextStyle(color: Colors.black),
+                        final task = state.task[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ],
+                            elevation: 1,
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.radio_button_unchecked,
+                                color: Colors.grey,
+                              ),
+                              title: Text(
+                                task.title,
+                                maxLines: 5,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        decoration: task.isCompleted
+                                            ? TextDecoration.lineThrough
+                                            : null,
+                                        overflow: TextOverflow.ellipsis),
+                              ),
+                              onTap: () {
+                                // Toggle task completion status
+                                BlocProvider.of<TaskCrudCubit>(context)
+                                    .removeTask(task);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child:
+                                          Text('Task is marked as completed'),
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         );
                       },
                       shrinkWrap: true,
                       separatorBuilder: (context, index) {
                         return const SizedBox(
-                          height: 10,
+                          height: 5,
                         );
                       },
                       itemCount: state.task.length),
@@ -92,16 +131,16 @@ class _TaskPageState extends State<TaskPage> {
               child: CircularProgressIndicator(),
             );
           } else if (state is FetchTaskFailed) {
-            return const Text('Something went wrong');
+            return const Text('Failed to load tasks');
           } else {
-            return Text('bad state');
+            return const Text('Something went wrong');
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddTaskDialog,
-        child: const Icon(Icons.add),
         tooltip: 'Add Task',
+        child: const Icon(Icons.add),
       ),
     );
   }

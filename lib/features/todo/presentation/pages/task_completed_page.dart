@@ -11,104 +11,82 @@ class TaskCompletedPage extends StatefulWidget {
 
 class _TaskCompletedPageState extends State<TaskCompletedPage> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BlocProvider.of<TaskCrudCubit>(context).fetchCompletedTask();
-    });
-  }
-
-  void _showAddTaskDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String taskTitle = '';
-        return AlertDialog(
-          title: const Text('Add Task'),
-          content: TextField(
-            onChanged: (value) {
-              taskTitle = value;
-            },
-            decoration: const InputDecoration(hintText: 'Task Title'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (taskTitle.isNotEmpty) {
-                  // Handle adding the task
-                  BlocProvider.of<TaskCrudCubit>(context).addTask(taskTitle);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Add'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task Todo'),
-      ),
       body: BlocBuilder<TaskCrudCubit, TaskCrudState>(
         builder: (context, state) {
-          if (state is FetchTaskSucess) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  ListView.separated(
-                      itemBuilder: (context, index) {
-                        return Row(
+          if (state is FetchTaskCompleted) {
+            if (state.task.isEmpty) {
+              return const Center(
+                child: Text('No completed tasks found.'),
+              );
+            } else {
+              return ListView.separated(
+                itemBuilder: (context, index) {
+                  final task = state.task[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 4,
+                      child: ListTile(
+                        title: Text(
+                          task.title,
+                          maxLines: 5,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge!
+                              .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: task.isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                  overflow: TextOverflow.ellipsis),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              state.task[index].title,
-                              style: TextStyle(color: Colors.black),
-                            ),
                             IconButton(
+                              icon: const Icon(Icons.undo, color: Colors.green),
                               onPressed: () {
                                 BlocProvider.of<TaskCrudCubit>(context)
-                                    .removeTask(state.task[index]);
+                                    .undoTask(task);
                               },
-                              icon: Icon(Icons.remove),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                BlocProvider.of<TaskCrudCubit>(context)
+                                    .deleteTask(task);
+                              },
                             ),
                           ],
-                        );
-                      },
-                      shrinkWrap: true,
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(
-                          height: 10,
-                        );
-                      },
-                      itemCount: state.task.length),
-                ],
-              ),
-            );
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 10);
+                },
+                itemCount: state.task.length,
+              );
+            }
           } else if (state is FetchTaskProgress) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           } else if (state is FetchTaskFailed) {
-            return const Text('Something went wrong');
+            return const Center(
+              child: Text('Failed to load tasks.'),
+            );
           } else {
-            return Text('bad state');
+            return const Center(child: Text('Something went wrong.'));
           }
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddTaskDialog,
-        child: const Icon(Icons.add),
-        tooltip: 'Add Task',
       ),
     );
   }

@@ -1,5 +1,6 @@
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import 'package:todo_app/features/todo/domain/entities/task.dart';
+import 'package:todo_app/core/local_db/object_gen.dart';
 import 'dart:convert';
 import '../models/task_model.dart';
 
@@ -8,6 +9,7 @@ abstract class TaskRemoteDataSource {
 }
 
 class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
+  final ObjectBox objectBox = GetIt.instance<ObjectBox>();
   final http.Client client;
 
   TaskRemoteDataSourceImpl({required this.client});
@@ -18,13 +20,9 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
     final response = await client
         .get(Uri.parse('https://jsonplaceholder.typicode.com/todos'));
 
-    print("printing response");
-    print(response);
-
     if (response.statusCode == 200) {
-      print("status code is 200");
       final List<dynamic> data = json.decode(response.body);
-      print(data);
+
       tasks = data
           .map((json) => TaskModel(
                 id: json['id'],
@@ -32,9 +30,21 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
                 isCompleted: json['completed'],
               ))
           .toList();
-      //tasks = data as List<TaskModel>;
-      print('printing tasks');
-      print(tasks);
+
+      tasks.take(5).toList().forEach(
+        (element) {
+          try {
+            TaskModel taskfromremote = TaskModel(
+              id: 0,
+              title: element.title,
+              isCompleted: element.isCompleted,
+            );
+            objectBox.taskBox.put(taskfromremote);
+          } catch (e) {}
+        },
+      );
+      objectBox.saveBoolean(false);
+
       return tasks.take(5).toList();
     } else {
       throw Exception('Failed to load tasks');

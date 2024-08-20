@@ -1,14 +1,3 @@
-//import 'package:objectbox/objectbox.dart';
-// import '../../domain/entities/task.dart';
-
-// class TaskModel extends Task {
-//   TaskModel({
-//     super.id = 0,
-//     required super.title,
-//     super.isCompleted = false,
-//   });
-// }
-
 import 'package:objectbox/objectbox.dart';
 import 'package:todo_app/features/todo/domain/entities/task.dart';
 
@@ -29,4 +18,14 @@ class TaskModel extends Task {
           title: title,
           isCompleted: isCompleted,
         );
+}
+
+@Entity()
+class BoolEntity {
+  @Id()
+  int id = 0; // This is required by ObjectBox and should be annotated with @Id.
+
+  bool value;
+
+  BoolEntity({required this.value});
 }

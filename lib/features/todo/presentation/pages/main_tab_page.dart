@@ -11,26 +11,78 @@ class MainTabPage extends StatefulWidget {
   State<MainTabPage> createState() => _MainTabPageState();
 }
 
-class _MainTabPageState extends State<MainTabPage> {
+class _MainTabPageState extends State<MainTabPage>
+    with SingleTickerProviderStateMixin {
+  List<Widget> listOfPage = const [
+    TaskPage(),
+    TaskCompletedPage(),
+  ];
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        if (_tabController.index == 1) {
+          BlocProvider.of<TaskCrudCubit>(context).fetchCompletedTask();
+        }
+        if (_tabController.index == 0) {
+          BlocProvider.of<TaskCrudCubit>(context).fetchTasks();
+        }
+      });
+    });
+  }
+
+  //dispose the controller
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Task Todo'),
-          bottom: const TabBar(
+          centerTitle: true,
+          title: Text(
+            'Task Todo',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge!
+                .copyWith(fontWeight: FontWeight.w600),
+          ),
+          bottom: TabBar(
+            controller: _tabController,
             tabs: [
-              Tab(text: 'To-Do'),
-              Tab(text: 'Completed'),
+              Tab(
+                child: Text(
+                  'To-do',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  'Completed',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            TaskPage(),
-            TaskCompletedPage(),
-          ],
+        body: IndexedStack(
+          index: _tabController.index,
+          children: listOfPage,
         ),
       ),
     );

@@ -1,47 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todo_app/core/local_db/bject_gen.dart';
-//import 'package:objectbox/objectbox.dart';
-import 'package:todo_app/features/todo/data/datasources/tasks_remote_datasource.dart';
-import 'package:todo_app/features/todo/data/repositories/task_repository_impl.dart';
-import 'package:todo_app/features/todo/domain/repositories/task_repository.dart';
-import 'package:todo_app/features/todo/domain/usecases/get_tasks_usecases.dart';
+import 'package:get_it/get_it.dart';
+import 'package:todo_app/core/injects/injection_container.dart';
+import 'package:todo_app/core/local_db/object_gen.dart';
 import 'package:todo_app/features/todo/presentation/cubit/task_crud_cubit/task_crud_cubit.dart';
 import 'package:todo_app/features/todo/presentation/pages/main_tab_page.dart';
-import 'package:todo_app/features/todo/presentation/pages/tasks_page.dart';
-import 'package:http/http.dart' as http;
-import 'package:todo_app/objectbox.g.dart';
-
-//late final Store store;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await setUpDependencies();
   // Initialize ObjectBox
+  final ObjectBox objectBox = GetIt.instance<ObjectBox>();
+
+  //check if the app is opened for the first time
+  if (objectBox.boolBox.isEmpty()) {
+    objectBox.saveBoolean(true);
+  }
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => TaskCrudCubit(
-            getTasks: GetTasks(
-              TaskRepositoryImpl(
-                taskRemoteDataSource: TaskRemoteDataSourceImpl(
-                  client: http.Client(),
-                ),
-              ),
-            ),
-          ),
+          create: (context) => GetIt.instance<TaskCrudCubit>(),
         ),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Todo-App',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

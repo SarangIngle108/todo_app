@@ -25,9 +25,17 @@ class FetchTaskSucess extends TaskCrudState {
   List<Object> get props => [task];
 }
 
+class FetchTaskCompleted extends TaskCrudState {
+  final List<Task> task;
+  const FetchTaskCompleted({required this.task});
+
+  @override
+  List<Object> get props => [task];
+}
+
 class FetchTaskFailed extends TaskCrudState {
-  String error;
-  FetchTaskFailed({required this.error});
+  final String error;
+  const FetchTaskFailed({required this.error});
   @override
   List<Object> get props => [error];
 }

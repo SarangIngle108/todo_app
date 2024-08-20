@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
-import 'package:todo_app/core/injects/injection_container.dart';
-import 'package:todo_app/core/local_db/bject_gen.dart';
+import 'package:todo_app/core/local_db/object_gen.dart';
 import 'package:todo_app/features/todo/data/models/task_model.dart';
 import 'package:todo_app/features/todo/domain/entities/task.dart';
 import 'package:todo_app/features/todo/domain/usecases/get_tasks_usecases.dart';
@@ -16,52 +13,104 @@ class TaskCrudCubit extends Cubit<TaskCrudState> {
   final ObjectBox objectBox = GetIt.instance<ObjectBox>();
 
   TaskCrudCubit({required this.getTasks}) : super(TaskCrudInitial());
-  List<Task> task = [];
-  Future<List<Task>> fetchTasks() async {
-    emit(FetchTaskProgress());
 
-    final tasks = await getTasks();
-    task = tasks;
-    if (task.length > 0) {
-      emit(FetchTaskSucess(task: task));
-    } else {
-      emit(FetchTaskFailed(error: 'w'));
+  void fetchTasks() async {
+    emit(FetchTaskProgress());
+    try {
+      final tasks = await getTasks();
+
+      emit(FetchTaskSucess(
+          task: tasks.where((element) {
+        return element.isCompleted == false;
+      }).toList()));
+    } catch (e) {
+      emit(const FetchTaskFailed(error: 'error'));
     }
-    return task;
   }
 
   void addTask(String title) {
     emit(FetchTaskProgress());
     TaskModel createTask = TaskModel(
-      id: task.isNotEmpty ? task.last.id + 1 : 1,
+      id: 0,
       title: title,
       isCompleted: false,
     );
-    task.add(createTask);
-    objectBox.taskBox.put(createTask);
-    final tasksfromlocal = objectBox.taskBox.getAll();
-    print('printing task from local');
-    print(tasksfromlocal);
-    print(task);
-    emit(FetchTaskSucess(task: task));
+    try {
+      objectBox.taskBox.put(createTask);
+      final tasksfromlocal = objectBox.taskBox.getAll();
+
+      emit(FetchTaskSucess(
+          task: tasksfromlocal.where((element) {
+        return element.isCompleted == false;
+      }).toList()));
+    } catch (e) {
+      emit(const FetchTaskFailed(error: 'error'));
+    }
   }
 
   void removeTask(Task deleteTask) {
     emit(FetchTaskProgress());
-    deleteTask.isCompleted = true;
-    task.remove(deleteTask);
-    print(task);
-    emit(FetchTaskSucess(task: task));
+
+    final task = objectBox.taskBox.get(deleteTask.id);
+    if (task != null) {
+      task.isCompleted = true;
+      objectBox.taskBox.put(task); // Save the updated task back to ObjectBox
+    }
+
+    final tasksFromLocal = objectBox.taskBox.getAll();
+    emit(FetchTaskSucess(
+        task: tasksFromLocal.where((element) {
+      return element.isCompleted == false;
+    }).toList()));
+  }
+
+  void undoTask(Task deleteTask) {
+    emit(FetchTaskProgress());
+
+    final task = objectBox.taskBox.get(deleteTask.id);
+    if (task != null) {
+      task.isCompleted = false;
+      objectBox.taskBox.put(task); // Save the updated task back to ObjectBox
+    }
+
+    final tasksFromLocal = objectBox.taskBox.getAll();
+    emit(FetchTaskCompleted(
+        task: tasksFromLocal.where((element) {
+      return element.isCompleted == true;
+    }).toList()));
+  }
+
+  void deleteTask(Task deleteTask) {
+    emit(FetchTaskProgress());
+
+    try {
+      // Delete the task from ObjectBox
+      objectBox.taskBox.remove(deleteTask.id);
+
+      // Fetch the remaining tasks from the local database
+      final tasksFromLocal = objectBox.taskBox.getAll();
+
+      emit(FetchTaskCompleted(
+          task: tasksFromLocal.where((element) {
+        return element.isCompleted == true;
+      }).toList()));
+    } catch (e) {
+      emit(const FetchTaskFailed(error: 'Failed to remove task.'));
+    }
   }
 
   void fetchCompletedTask() {
     emit(FetchTaskProgress());
 
-    emit(FetchTaskSucess(
-        task: task.where(
-      (element) {
+    try {
+      final tasksfromlocal = objectBox.taskBox.getAll();
+
+      emit(FetchTaskCompleted(
+          task: tasksfromlocal.where((element) {
         return element.isCompleted == true;
-      },
-    ).toList()));
+      }).toList()));
+    } catch (e) {
+      emit(const FetchTaskFailed(error: 'w'));
+    }
   }
 }

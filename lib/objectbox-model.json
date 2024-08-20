@@ -4,23 +4,42 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:2211828694981233354",
-      "lastPropertyId": "3:4241070013300585972",
+      "id": "1:3304031820020892767",
+      "lastPropertyId": "2:2037257359195944128",
+      "name": "BoolEntity",
+      "properties": [
+        {
+          "id": "1:5702455332200145478",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2037257359195944128",
+          "name": "value",
+          "type": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:8492644471954043251",
+      "lastPropertyId": "3:3968943102946474088",
       "name": "TaskModel",
       "properties": [
         {
-          "id": "1:7847975909411816728",
+          "id": "1:8414628767430718471",
           "name": "id",
           "type": 6,
-          "flags": 129
+          "flags": 1
         },
         {
-          "id": "2:9096287480976740456",
+          "id": "2:9123696016393051354",
           "name": "title",
           "type": 9
         },
         {
-          "id": "3:4241070013300585972",
+          "id": "3:3968943102946474088",
           "name": "isCompleted",
           "type": 1
         }
@@ -28,7 +47,7 @@
       "relations": []
     }
   ],
-  "lastEntityId": "1:2211828694981233354",
+  "lastEntityId": "2:8492644471954043251",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
