@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:todo_app/core/injects/injection_container.dart';
 import 'package:todo_app/core/local_db/object_gen.dart';
+import 'package:todo_app/features/todo/data/models/task_model.dart';
 import 'package:todo_app/features/todo/presentation/cubit/task_crud_cubit/task_crud_cubit.dart';
 import 'package:todo_app/features/todo/presentation/pages/main_tab_page.dart';
 
