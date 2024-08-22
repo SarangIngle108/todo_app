@@ -46,6 +46,41 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
+  void _showEditTaskDialog(String initialTitle, Function(String) onSave) {
+    TextEditingController controller =
+        TextEditingController(text: initialTitle);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Task'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: 'Task Title'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (controller.text.isNotEmpty) {
+                  onSave(controller.text);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +131,18 @@ class _TaskPageState extends State<TaskPage> {
                                             ? TextDecoration.lineThrough
                                             : null,
                                         overflow: TextOverflow.ellipsis),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  _showEditTaskDialog(
+                                    task.title,
+                                    (newTitle) {
+                                      BlocProvider.of<TaskCrudCubit>(context)
+                                          .editTask(task, newTitle);
+                                    },
+                                  );
+                                },
                               ),
                               onTap: () {
                                 // Toggle task completion status

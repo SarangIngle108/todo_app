@@ -80,6 +80,22 @@ class TaskCrudCubit extends Cubit<TaskCrudState> {
     }).toList()));
   }
 
+  void editTask(Task editTask, String newTitle) {
+    emit(FetchTaskProgress());
+
+    final task = objectBox.taskBox.get(editTask.id);
+    if (task != null) {
+      task.title = newTitle;
+      objectBox.taskBox.put(task); // Save the updated task back to ObjectBox
+    }
+
+    final tasksFromLocal = objectBox.taskBox.getAll();
+    emit(FetchTaskSucess(
+        task: tasksFromLocal.where((element) {
+      return element.isCompleted == false;
+    }).toList()));
+  }
+
   void deleteTask(Task deleteTask) {
     emit(FetchTaskProgress());
 
